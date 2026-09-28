@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threads</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #101010;
+            color: #f5f5f5;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+
+        /* page */
+        .page {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* sidebar */
+        .sidebar {
+            width: 200px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 18px 12px;
+            background-color: #101010;
+            z-index: 10;
+        }
+
+        .sidebar__brand {
+            height: 34px;
+            margin-left: 7px;
+            margin-bottom: 18px;
+            font-size: 23px;
+            font-weight: bold;
+            font-style: italic;
+            letter-spacing: -1px;
+        }
+
+        .sidebar__brand-icon {
+            font-size: 22px;
+            margin-right: 3px;
+        }
+
+        .sidebar__menu {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .sidebar__item {
+            height: 38px;
+            margin-bottom: 2px;
+            position: relative;
+            display: block;
+            padding: 10px 9px;
+            border-radius: 7px;
+            color: #eeeeee;
+            font-size: 14px;
+        }
+
+        .sidebar__item:hover {
+            background-color: #1b1b1b;
+        }
+
+        .sidebar__item--active {
+            background-color: #292929;
+            font-weight: bold;
+        }
+
+        .sidebar__icon {
+            width: 22px;
+            float: left;
+            font-size: 18px;
+            line-height: 17px;
+        }
+
+        .sidebar__text {
+            margin-left: 4px;
+            line-height: 18px;
+        }
+
+        .sidebar__section {
+            margin-top: 22px;
+        }
+
+        .sidebar__section-title {
+            padding: 0 8px;
+            margin-bottom: 9px;
+            color: #777777;
+            font-size: 11px;
+        }
+
+        .sidebar__edit {
+            float: right;
+            color: #777777;
+            font-size: 11px;
+        }
+
+        /* main */
+        .main {
+            min-height: 100vh;
+            position: relative;
+            margin-left: 200px;
+        }
+        
+        /* top bar */
+        .topbar {
+            width: 100%;
+            height: 60px;
+            position: relative;
+            border-bottom: 1px solid transparent;
+        }
+
+        .topbar__title {
+            width: 535px;
+            position: absolute;
+            left: 50%;
+            top: 0;
+            margin-left: -267px;
+            height: 60px;
+            padding-top: 22px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .topbar__more {
+            width: 28px;
+            height: 28px;
+            position: fixed;
+            top: 18px;
+            right: 557px;
+            color: #eeeeee;
+            font-size: 20px;
+            text-align: center;
+            line-height: 22px;
+        }
+
+        /* feed */
+       .feed {
+            width: 535px;
+            position: relative;
+            margin: 0 auto;
+            border-left: 1px solid #292929;
+            border-right: 1px solid #292929;
+        }
+
+        /* composer */
+        .composer {
+            min-height: 66px;
+            position: relative;
+            padding: 12px 12px;
+            border-top: 1px solid #292929;
+            border-bottom: 1px solid #292929;
+        }
+
+        .composer__avatar {
+            width: 31px;
+            height: 31px;
+            float: left;
+            margin-right: 10px;
+            border-radius: 50%;
+            background-color: #303030;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .composer__avatar::after {
+            content: "👤";
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .composer__input {
+            float: left;
+            width: 370px;
+            height: 34px;
+            padding-top: 8px;
+            color: #777777;
+            font-size: 14px;
+        }
+
+        .composer__button {
+            float: right;
+            width: 53px;
+            height: 31px;
+            margin-top: 0;
+            border: 1px solid #292929;
+            border-radius: 9px;
+            background-color: transparent;
+            color: #eeeeee;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* post */
+        .post {
+            position: relative;
+            padding: 14px 20px 15px 20px;
+            border-bottom: 1px solid #292929;
+            overflow: hidden;
+        }
+
+        .post__header {
+            min-height: 39px;
+            position: relative;
+        }
+
+        .post__avatar {
+            width: 31px;
+            height: 31px;
+            float: left;
+            margin-right: 9px;
+            border-radius: 50%;
+            background-color: #353535;
+            position: relative;
+        }
+
+        .post__avatar::after {
+            content: "👤";
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            font-size: 17px;
+        }
+
+        .post__user {
+            padding-top: 2px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .post__time {
+            margin-left: 4px;
+            color: #777777;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .post__more {
+            position: absolute;
+            right: 0;
+            top: 0;
+            color: #777777;
+            font-size: 17px;
+        }
+
+        .post__text {
+            clear: both;
+            padding-left: 40px;
+            margin-top: -2px;
+            margin-bottom: 10px;
+            color: #eeeeee;
+            font-size: 13px;
+            line-height: 18px;
+        }
+
+        .post__translate {
+            color: #777777;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+
+    /* foto */
+        .post__media {
+            width: 453px;
+            height: 243px;
+            margin-left: 40px;
+            margin-bottom: 11px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 7px;
+            background-color: #252525;
+            border: 1px solid #383838;
+        }
+
+        .post__media::before {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            margin-top: -12px;
+            color: #777777;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .post__image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* post actions */
+        .post__actions {
+            height: 25px;
+            padding-left: 40px;
+        }
+
+        .post__action {
+            float: left;
+            min-width: 43px;
+            margin-right: 5px;
+            color: #aaaaaa;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .post__action-icon {
+            margin-right: 3px;
+            color: #dddddd;
+            font-size: 17px;
+            vertical-align: middle;
+        }
+
+
+        /* post tanpa gambar */
+        .post--text-only {
+            padding-bottom: 20px;
+        }
+
+        .post--text-only .post__text {
+            margin-bottom: 13px;
+        }
+
+        /* float clear */
+        .post::after,
+        .composer::after,
+        .post__actions::after,
+        .sidebar__item::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* floating button */
+        .floating-button {
+            width: 70px;
+            height: 58px;
+            position: fixed;
+            right: 31px;
+            bottom: 19px;
+            border: 1px solid #333333;
+            border-radius: 14px;
+            background-color: #111111;
+            color: white;
+            font-size: 31px;
+            line-height: 52px;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .floating-button:hover {
+            background-color: #1d1d1d;
+        }
+
+        /*icon kanan*/
+        .right-icon {
+            width: 20px;
+            height: 20px;
+            position: fixed;
+            right: 490px;
+            top: 457px;
+            color: #aaaaaa;
+            font-size: 19px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+
+        <!--sidebar-->
+        <aside class="sidebar">
+            <div class="sidebar__brand">
+                <span class="sidebar__brand-icon">@</span>threads
+            </div>
+
+            <ul class="sidebar__menu">
+
+                <li class="sidebar__item sidebar__item--active">
+                        <span class="sidebar__icon">⌂</span>
+                        <span class="sidebar__text">For you</span>
+                </li>
+
+                <li class="sidebar__item">
+                        <span class="sidebar__icon">＋</span>
+                        <span class="sidebar__text">New thread</span>
+                </li>
+
+                <li class="sidebar__item">
+                        <span class="sidebar__icon">⌕</span>
+                        <span class="sidebar__text">Search</span>
+                </li>
+
+                <li class="sidebar__item">
+                        <span class="sidebar__icon">▷</span>
+                        <span class="sidebar__text">Messages</span>
+                </li>
+
+                <li class="sidebar__item">
+                        <span class="sidebar__icon">♡</span>
+                        <span class="sidebar__text">Activity</span>
+                </li>
+
+                <li class="sidebar__item">
+                        <span class="sidebar__icon">♙</span>
+                        <span class="sidebar__text">Profile</span>
+                </li>
+
+                <li class="sidebar__item">
+                        <span class="sidebar__icon">▥</span>
+                        <span class="sidebar__text">Insights</span>
+                </li>
+            </ul>
+
+            <div class="sidebar__section">
+
+                <div class="sidebar__section-title">
+                    Other feeds
+                    <span class="sidebar__edit">Edit</span>
+                </div>
+
+                <ul class="sidebar__menu">
+
+                    <li class="sidebar__item">
+                            <span class="sidebar__text">Following</span>
+                    </li>
+
+                    <li class="sidebar__item">
+                            <span class="sidebar__icon">♡</span>
+                            <span class="sidebar__text">Saved</span>
+                    </li>
+
+                    <li class="sidebar__item">
+                            <span class="sidebar__icon">♡</span>
+                            <span class="sidebar__text">Liked</span>
+                    </li>
+
+                    <li class="sidebar__item">
+                            <span class="sidebar__text">Ghost posts</span>
+                            <span class="sidebar__edit">◔</span>
+                    </li>
+
+                    <li class="sidebar__item">
+                            <span class="sidebar__icon">♧</span>
+                            <span class="sidebar__text">Archive</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+
+        <!--main content-->
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar__title">
+                    For you
+                </div>
+                <div class="topbar__more">
+                    ⊙
+                </div>
+            </header>
+
+            <!--feed -->
+            <section class="feed">
+
+                <!--composer-->
+                <div class="composer">
+                    <div class="composer__avatar"></div>
+                    <div class="composer__input">
+                        What's new?
+                    </div>
+
+                    <button class="composer__button">
+                        Post
+                    </button>
+                </div>
+
+                <!--post 1-->
+                <article class="post">
+                    <div class="post__header">
+                        <div class="post__avatar"></div>
+                        <div class="post__user">
+                            osismpkpnb
+                            <span class="post__time">20h</span>
+                        </div>
+                        <div class="post__more">
+                            ...
+                        </div>
+                    </div>
+
+                    <div class="post__text">
+                        afterrr MUBESSSS, sukses terus buat OSIS SMK Plus Pelita Nusantara, semoga bisa menjadi OSIS yang lebih baik lagi kedepannya, dan bisa membawa nama baik sekolah.
+                        <span class="post__translate">Translate</span>
+                    </div>
+
+                    <!--gambar-->
+                    <div class="post__media">
+                        <img
+                            src="osis.jpeg"
+                            alt="Foto postingan"
+                            class="post__image">
+                    </div>
+
+                    <div class="post__actions">
+                        <div class="post__action">
+                            <span class="post__action-icon">♡</span>
+                            13.9K
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">◯</span>
+                            498
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">⟳</span>
+                            259
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">▷</span>
+                            265
+                        </div>
+                    </div>
+                </article>
+
+                <!-- post 2 -->
+                <article class="post">
+                    <div class="post__header">
+                        <div class="post__avatar"></div>
+                        <div class="post__user">
+                            nfsaasqyh
+                            <span class="post__time">5h</span>
+                        </div>
+                        <div class="post__more">
+                            ...
+                        </div>
+                    </div>
+
+                    <div class="post__text">
+                       event Bela Negara
+                        <span class="post__translate">Translate</span>
+                    </div>
+
+                    <div class="post__media">
+                        <img
+                            src="pasus.jpeg"
+                            alt="Foto postingan"
+                            class="post__image">
+                    </div>
+
+                    <div class="post__actions">
+                        <div class="post__action">
+                            <span class="post__action-icon">♡</span>
+                            123
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">◯</span>
+                            21
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">⟳</span>
+                            2
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">▷</span>
+                            1
+                        </div>
+                    </div>
+                </article>
+
+                <!--post 3-->
+                <article class="post post--text-only">
+                    <div class="post__header">
+                        <div class="post__avatar"></div>
+                        <div class="post__user">
+                            aymayam
+                            <span class="post__time">5h</span>
+                        </div>
+                        <div class="post__more">
+                            ...
+                        </div>
+                    </div>
+
+                    <div class="post__text">
+                        Belajar bukan sekadar mencari pekerjaan, tetapi proses seumur hidup untuk menjadi manusia yang bijak dan peduli pada sesama.
+                    </div>
+
+                    <div class="post__actions">
+
+                        <div class="post__action">
+                            <span class="post__action-icon">♡</span>
+                            100
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">◯</span>
+                            10
+                        </div>
+
+                        <div class="post__action">
+                            <span class="post__action-icon">⟳</span>
+                            5
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+
+        <!-- icon kanan -->
+        <div class="right-icon">
+            ♧
+        </div>
+
+        <!-- floating button -->
+        <div class="floating-button">
+            ＋
+        </div>
+    </div>
+
+</body>
+</html>
